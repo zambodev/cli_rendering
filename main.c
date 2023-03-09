@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <unistd.h>
 
 #define SIZE 16
 #define FOV 90
@@ -33,11 +34,41 @@ void vec2_insert(vec2 *points, int x, int y)
 	++points->fill_idx;
 }
 
-void vec2_print(vec2 *points)
-{
-	for(int i=0; i<SIZE; ++i)
-		printf("%d %d\n", points->x[i], points->y[i]);	
-	
+void vec2_print(vec2 *points, size_t size, int setgraph)
+{	
+	if(setgraph)
+	{
+		printf("POINT VIEW:\n");
+		printf("|-");
+		for(int i=0; i<size; ++i)
+			printf("--");
+		printf("|\n");
+
+		for(int i=0; i<size; ++i)
+		{
+			printf("| ");
+			for(int j=0; j<size; ++j)
+			{	
+				if(vec2_find(points, j, i))
+					printf("2 ");
+				else
+					printf("  ");
+			}
+			printf("|");
+			printf("\n");
+		}
+		
+		printf("|-");
+		for(int i=0; i<size; ++i)
+			printf("--");
+		printf("|\n");
+	}
+	else
+	{
+		for(int i=0; i<SIZE; ++i)
+			printf("%d %d\n", points->x[i], points->y[i]);	
+	}
+
 	printf("\n");
 }
 
@@ -48,40 +79,49 @@ void map_load(char map[], size_t size, const char *filename)
 	fclose(f);	
 }
 
-void map_print(char map[], size_t size)
+void map_print(char map[], size_t size, int setzero)
 {
+	printf("MAP VIEW:\n");
+	printf("|-");
+	for(int i=0; i<size; ++i)
+		printf("--");
+	printf("|\n");
+
 	for(int i=0; i<size; ++i)
 	{
+		printf("| ");
 		for(int j=0; j<size; ++j)
 		{
-			printf("%c ", map[i*size+j]);
+			if(setzero || map[i*size+j] != '0')
+				printf("%c ", map[i*size+j]);
+			else
+				printf("  ");	
 		}
+		printf("|");
 		printf("\n");
 	}
-
-	printf("\n");
-
-	fflush(stdout);
+	
+	printf("|-");
+	for(int i=0; i<size; ++i)
+		printf("--");
+	printf("|\n");
 }
 
 /* Get visible pointes */
-void map_getvp(char map[], size_t size, vec2 *points)
+void map_getvp(char map[], size_t size, vec2 *points, double cam[2], double vangle)
 {
-	int upos[2];
-
 	for(int i=0; i<size*size; ++i)
 	{	
 		if(map[i] == '1')
 		{
-			upos[0] = i/size;	// Y 
-			upos[1] = i-((i/size)*size);	// X 
+			cam[0] = i-((i/size)*size);	// X 
+			cam[1] = i/size;	// Y 
 		}
 	}
 	
-	double vangle = 90;
-	for(double i=vangle-FOV/2; i<=vangle+FOV/2; i+=0.1)
+	for(double i=vangle+FOV/2; i>=vangle-FOV/2; i-=0.1)
 	{
-		double x=upos[1], y=upos[0];
+		double x=cam[0], y=cam[1];
 		double tmp;
 		do
 		{
@@ -101,17 +141,74 @@ void map_getvp(char map[], size_t size, vec2 *points)
 	
 }
 
-int main()
+void render(vec2 *points, size_t size, double userp[2])
 {
+	char *matrix = calloc(size*size, 1);
+	memset(matrix, '0', size*size);
 
+	for(int i=0; i<size; ++i)
+	{
+		if(i < points->fill_idx)
+		{
+			double d = sqrt((points->x[i]-userp[0])*(points->x[i]-userp[0]) + 
+							(points->y[i]-userp[1])*(points->y[i]-userp[1]));
+
+			//printf("%d %d\n", points->x[i], points->y[i]);
+
+			double tmp = 0;
+			while(tmp < d && (size-points->x[i])-tmp >= 0)
+			{
+				//printf("%f %f\n", (size-points->x[i])-tmp, tmp);
+				matrix[(int)((size-points->x[i])-tmp)*size+points->y[i]] = '2';
+
+				tmp += 1.0;
+			}
+		}
+		//puts("---------");
+	}
+
+	map_print(matrix, size, 0);
+
+	free(matrix);
+}
+
+int main(int argc, char **argv)
+{
 	char map[SIZE*SIZE];
-	int arr[SIZE];
-	vec2 points = {{0}, {0}, 0};
+	double camera[2];
+	vec2 points;
+
+	memset(points.x, -1, SIZE*4);
+	memset(points.y, -1, SIZE*4);
+	points.fill_idx = 0;
 
 	map_load(map, SIZE, "map.txt");
-	map_print(map, SIZE);
-	map_getvp(map, SIZE, &points);
-	vec2_print(&points);
+
+	double angle = strtod(argv[1], NULL);
+	double val = 1;
+
+#ifdef SHOWOFF
+	while(1)
+	{
+		usleep(500000);
+		printf("\x1b[H\x1b[2J");
+		fflush(stdout);
+		printf("%f\n", angle);
+		memset(points.x, -1, SIZE*4);
+		memset(points.y, -1, SIZE*4);
+		points.fill_idx = 0;
+#endif
+
+		map_print(map, SIZE, 0);
+		map_getvp(map, SIZE, &points, camera, angle);
+		vec2_print(&points, SIZE, 1);
+		render(&points, SIZE, camera);
+
+#ifdef SHOWOFF
+		angle -= val;
+		if(angle<0.0) val *= -1;
+	}
+#endif
 
 	return 0;
 }
