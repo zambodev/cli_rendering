@@ -5,7 +5,7 @@
 
 #define SIZE 16
 #define FOV 90
-
+#define PI 3.14159265
 
 typedef struct VEC2
 {
@@ -78,30 +78,24 @@ void map_getvp(char map[], size_t size, vec2 *points)
 		}
 	}
 	
-	double mul = 1;
-	for(double i=FOV/2; i>=0; i-=0.2)
+	double vangle = 90;
+	for(double i=vangle-FOV/2; i<=vangle+FOV/2; i+=0.1)
 	{
 		double x=upos[1], y=upos[0];
 		double tmp;
 		do
 		{
-			x -= mul*cos(i/2); 
-			y -= sin(i/2);
-			//printf("%f %f\n", x, y);
+			x += cos(i*PI/180); 
+			y -= sin(i*PI/180);
 		}
 		while(map[(int)y*size+(int)x] == '0' && x >= 0 && x < size && y >= 0 && y < size);
-		
+
 		if(map[(int)y*size+(int)x] == '2')
 		{
 			vec2_insert(points, (int)x, (int)y);	
-			//printf("%d -- %dx %dy -- %c\n", (int)i, (int)x, (int)y, map[(int)y*size+(int)x]);
+			//printf("%d -- %fx %fy -- %c\n", (int)i, x, y, map[(int)y*size+(int)x]);
 		}
 
-		if(i == 0 && mul > 0)
-		{
-			i = FOV/2;
-			mul = -1;
-		}
 	}
 
 	
