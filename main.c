@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 		map_print(map, 0);
 		map_getvp(map, &points, camera, angle);
 		vec2_print(&points, 1);
-		//render(&points, camera);
+		render(&points, camera);
 
 #ifdef SHOWOFF
 		angle -= val;
