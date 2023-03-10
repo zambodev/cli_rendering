@@ -156,8 +156,16 @@ void render(vec2 *points, float userp[2])
 	char *matrix = calloc(SIZE*SIZE, 1);
 	memset(matrix, '0', SIZE*SIZE);
 
-	const int inc = (SIZE-points->f)/2;
+	int max = -1;
+	int min = SIZE;
+	for(int i=0; i<SIZE*SIZE; ++i)
+		if(i < points->f)
+			if(max < points->y[i]) max = points->y[i];
+			else if(min > points->y[i]) min = points->y[i];
 
+	int width = points->f;
+	const int inc = (SIZE-width)/2;
+	int add = 0;
 	for(int i=0; i<SIZE*SIZE; ++i)
 	{
 		if(i < points->f)
@@ -172,7 +180,11 @@ void render(vec2 *points, float userp[2])
 			{
 				//printf("%f\n", tmp);
 				//printf("%f %f\n", (SIZE-points->x[i])-tmp, tmp);
-				matrix[(int)((SIZE-d)-tmp)*SIZE+inc+i] = points->h[i]+48;
+		
+				if(i > 0 && points->y[i] > points->y[i-1] && points->x[i] > points->x[i-1])
+					add = sqrt(pow((points->y[i] - points->y[i-1]), 2) + pow((points->x[i] - points->x[i-1]), 2));
+
+				matrix[(int)((SIZE-d)-tmp)*SIZE+inc+add+i] = points->h[i]+48;
 
 				tmp += 1.0;
 			}
