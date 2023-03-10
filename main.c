@@ -162,7 +162,7 @@ void render(vec2 *points, double userp[2])
 			while(tmp < d && (SIZE-points->x[i])-tmp >= 0)
 			{
 				//printf("%f %f\n", (SIZE-points->x[i])-tmp, tmp);
-				matrix[(int)((SIZE-points->x[i])-tmp)*SIZE+points->y[i]] = points->h[i];
+				matrix[(int)((SIZE-points->x[i])-tmp)*SIZE+points->y[i]] = points->h[i]+48;
 
 				tmp += 1.0;
 			}
