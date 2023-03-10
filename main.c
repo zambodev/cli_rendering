@@ -4,7 +4,7 @@
 #include <math.h>
 #include <unistd.h>
 
-#define SIZE 16
+#define SIZE 32
 #define FOV 90
 #define PI 3.14159265
 
@@ -78,7 +78,14 @@ void vec2_print(vec2 *points, int setgraph)
 void map_load(char map[], const char *filename)
 {
 	FILE *f = fopen(filename, "r");
-	fread(map, 1, SIZE*SIZE, f);
+
+	char str[SIZE+2];
+
+	for(int i=0; i<SIZE; ++i)
+	{
+		fread(str, 1, SIZE+2, f);
+		strncpy(&map[i*SIZE], str, SIZE);
+	}
 	fclose(f);	
 }
 
@@ -111,7 +118,7 @@ void map_print(char map[], int setzero)
 }
 
 /* Get visible pointes */
-void map_getvp(char map[], vec2 *points, double cam[2], double vangle)
+void map_getvp(char map[], vec2 *points, float cam[2], float vangle)
 {
 	for(int i=0; i<SIZE*SIZE; ++i)
 	{	
@@ -122,10 +129,10 @@ void map_getvp(char map[], vec2 *points, double cam[2], double vangle)
 		}
 	}
 	
-	for(double i=vangle+FOV/2; i>=vangle-FOV/2; i-=0.1)
+	for(float i=vangle+FOV/2; i>=vangle-FOV/2; i-=0.1)
 	{
-		double x=cam[0], y=cam[1];
-		double tmp;
+		float x=cam[0], y=cam[1];
+		float tmp;
 		do
 		{
 			x += cos(i*PI/180); 
@@ -136,7 +143,7 @@ void map_getvp(char map[], vec2 *points, double cam[2], double vangle)
 		if(map[(int)y*SIZE+(int)x] > '1' && map[(int)y*SIZE+(int)x] < '9')
 		{
 			vec2_insert(points, (int)x, (int)y, map[(int)y*SIZE+(int)x]-48);	
-			//printf("%.2f -- %.2fx %.2fy -- %c\n", i, x, y, map[(int)y*SIZE+(int)x]);
+			//printf("%.2f -- %.2fx %.2fy -- %c %d\n", i, x, y, map[(int)y*SIZE+(int)x], (int)y);
 		}
 
 	}
@@ -144,29 +151,33 @@ void map_getvp(char map[], vec2 *points, double cam[2], double vangle)
 	
 }
 
-void render(vec2 *points, double userp[2])
+void render(vec2 *points, float userp[2])
 {
 	char *matrix = calloc(SIZE*SIZE, 1);
 	memset(matrix, '0', SIZE*SIZE);
 
-	for(int i=0; i<SIZE; ++i)
+	const int inc = (SIZE-points->f)/2;
+
+	for(int i=0; i<SIZE*SIZE; ++i)
 	{
 		if(i < points->f)
 		{
-			double d = sqrt((points->x[i]-userp[0])*(points->x[i]-userp[0]) + 
+			float d = sqrt((points->x[i]-userp[0])*(points->x[i]-userp[0]) + 
 							(points->y[i]-userp[1])*(points->y[i]-userp[1]));
 
-			//printf("%d %d\n", points->x[i], points->y[i]);
+			//printf("%d %d %f\n", points->x[i], points->y[i], d);
 
-			double tmp = 0;
-			while(tmp < d && (SIZE-points->x[i])-tmp >= 0)
+			float tmp = 0;
+			while(tmp < (SIZE-d*1.5))
 			{
+				//printf("%f\n", tmp);
 				//printf("%f %f\n", (SIZE-points->x[i])-tmp, tmp);
-				matrix[(int)((SIZE-points->x[i])-tmp)*SIZE+points->y[i]] = points->h[i]+48;
+				matrix[(int)((SIZE-d)-tmp)*SIZE+inc+i] = points->h[i]+48;
 
 				tmp += 1.0;
 			}
 		}
+
 		//puts("---------");
 	}
 
@@ -178,7 +189,7 @@ void render(vec2 *points, double userp[2])
 int main(int argc, char **argv)
 {
 	char map[SIZE*SIZE];
-	double camera[2];
+	float camera[2];
 	vec2 points;
 
 	memset(points.x, -1, SIZE*SIZE*4);
@@ -188,8 +199,8 @@ int main(int argc, char **argv)
 
 	map_load(map, "map.txt");
 
-	double angle = strtod(argv[1], NULL);
-	double val = 1;
+	float angle = strtod(argv[1], NULL);
+	float val = 1;
 
 #ifdef SHOWOFF
 	while(1)
