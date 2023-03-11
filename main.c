@@ -36,7 +36,7 @@ void vec2_insert(vec2 *points, int x, int y, int h)
 	++points->f;
 }
 
-void vec2_print(vec2 *points, int setgraph)
+void vec2_print(vec2 *points, float cam[2], int setgraph)
 {	
 	if(setgraph)
 	{
@@ -54,6 +54,8 @@ void vec2_print(vec2 *points, int setgraph)
 				int tmp;
 				if((tmp = vec2_find(points, j, i)))
 					printf("%d ", tmp);
+				else if((int)cam[0] == j && (int)cam[1] == i)
+					printf("1 ");
 				else
 					printf("  ");
 			}
@@ -119,16 +121,7 @@ void map_print(char map[], int setzero)
 
 /* Get visible pointes */
 void map_getvp(char map[], vec2 *points, float cam[2], float vangle)
-{
-	for(int i=0; i<SIZE*SIZE; ++i)
-	{	
-		if(map[i] == '1')
-		{
-			cam[0] = i-((i/SIZE)*SIZE);	// X 
-			cam[1] = i/SIZE;	// Y 
-		}
-	}
-	
+{	
 	for(float i=vangle+FOV/2; i>=vangle-FOV/2; i-=0.1)
 	{
 		float x=cam[0], y=cam[1];
@@ -159,9 +152,15 @@ void render(vec2 *points, float userp[2])
 	int max = -1;
 	int min = SIZE;
 	for(int i=0; i<SIZE*SIZE; ++i)
+	{
 		if(i < points->f)
-			if(max < points->y[i]) max = points->y[i];
-			else if(min > points->y[i]) min = points->y[i];
+		{
+			if(max < points->y[i]) 
+				max = points->y[i];
+			else if(min > points->y[i]) 
+				min = points->y[i];
+		}
+	}
 
 	int width = points->f;
 	const int inc = (SIZE-width)/2;
@@ -211,6 +210,15 @@ int main(int argc, char **argv)
 
 	map_load(map, "map.txt");
 
+	for(int i=0; i<SIZE*SIZE; ++i)
+	{	
+		if(map[i] == '1')
+		{
+			camera[0] = i-((i/SIZE)*SIZE);	// X 
+			camera[1] = i/SIZE;	// Y 
+		}
+	}
+
 	float angle = strtod(argv[1], NULL);
 	float val = 1;
 
@@ -220,7 +228,6 @@ int main(int argc, char **argv)
 		usleep(500000);
 		printf("\x1b[H\x1b[2J");
 		fflush(stdout);
-		printf("%f\n", angle);
 		memset(points.x, -1, SIZE*SIZE*4);
 		memset(points.y, -1, SIZE*SIZE*4);
 		memset(points.h, 0, SIZE*SIZE*4);
@@ -229,12 +236,16 @@ int main(int argc, char **argv)
 
 		map_print(map, 0);
 		map_getvp(map, &points, camera, angle);
-		vec2_print(&points, 1);
+		vec2_print(&points, camera, 1);
 		render(&points, camera);
 
 #ifdef SHOWOFF
-		angle -= val;
-		if(angle<0.0) val *= -1;
+		camera[1] -= val;
+		angle -= val*4;
+
+		if(camera[1] == 1)
+			val *= -1;
+		
 	}
 #endif
 
