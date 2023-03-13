@@ -1,0 +1,6 @@
+*.txt
+.vscode
+*.o
+
+test
+
