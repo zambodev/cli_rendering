@@ -22,9 +22,11 @@ SETUP: Two walls corner render, FOV 90, ANGLE 45
 Map:
 <br>
 ![Corner map](./showcase/corner_map.png)
+<br>
 Camera view:
 <br>
-![Corner detect](./showcase/corner_detect.png)
+![Corner detect](./showcase/corner_cam_view.png)
+<br>
 Actual render:
 <br>
 ![Corner render](./showcase/corner_render.png)
