@@ -20,11 +20,12 @@ NOTE: view_direction is in degrees
 SETUP: Two walls corner render, FOV 90, ANGLE 45
 
 Map:
-![alt text](./showcase/corner_map.png)
 <br>
+![Corner map](./showcase/corner_map.png)
 Camera view:
-![alt text](./showcase/corner_detect.png)
 <br>
+![Corner detect](./showcase/corner_detect.png)
 Actual render:
-![alt text](./showcase/corner_render.png)
+<br>
+![Corner render](./showcase/corner_render.png)
 
