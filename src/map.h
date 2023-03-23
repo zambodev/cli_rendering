@@ -13,11 +13,11 @@ void map_load(char map[], int32_t width, int32_t height, const char *filename)
 {
 	FILE *f = fopen(filename, "r");
 
-	char str[width+2];
+	char str[width+1];
 
 	for(int i=0; i<height; ++i)
 	{
-		fread(str, 1, width+2, f);
+		fread(str, 1, width+1, f);
 		strncpy(&map[i*width], str, width);
 	}
 	fclose(f);	

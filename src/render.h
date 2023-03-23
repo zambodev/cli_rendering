@@ -7,6 +7,8 @@
 #include "map.h"
 
 
+const char shadow[5] = {'#', '/', ':', '.', ' '};
+
 void render(vec2arr_t *points, int32_t width, int32_t height, float userp[2])
 {
 	char *matrix = calloc(points->size, 1);
@@ -46,7 +48,7 @@ void render(vec2arr_t *points, int32_t width, int32_t height, float userp[2])
 				if(i > 0 && points->arr[i].y > points->arr[i-1].y && points->arr[i].x > points->arr[i-1].x)
 					add = sqrt(pow((points->arr[i].y - points->arr[i-1].y), 2) + pow((points->arr[i].x - points->arr[i-1].x), 2));
 
-				matrix[(int)((points->height-d)-tmp)*points->height+inc+add+i] = points->arr[i].s+48;
+				matrix[(int)((points->height-d)-tmp)*points->height+inc+add+i] = shadow[(int)d/5%5];
 
 				tmp += 1.0;
 			}
