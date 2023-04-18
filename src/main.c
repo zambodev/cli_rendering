@@ -33,9 +33,23 @@ int main(int argc, char **argv)
 
 	float angle = strtof(argv[3], NULL);
 
-	map_print(map, w, h);
+#ifdef SHOWOFF
+	int val = 1;
+
+	while(1)
+	{		
+		camera[1] -= val;
+		angle -= val*4;
+
+		if(camera[1] == 1)
+			val *= -1;
+#endif
+
 	map_getvp(map, w, h, &vecarr, camera, angle);
+#ifndef SHOWOFF
+	map_print(map, w, h);
 	vec2arr_print(&vecarr, camera, 1);
+#endif
 	render(&vecarr, w, h, camera);
 
 #ifdef SHOWOFF
@@ -44,7 +58,8 @@ int main(int argc, char **argv)
 
 		if(camera[1] == 1)
 			val *= -1;
-		
+
+		usleep(500000);
 	}
 #endif
 

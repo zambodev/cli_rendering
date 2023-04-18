@@ -11,47 +11,35 @@ const char shadow[5] = {'#', '/', ':', '.', ' '};
 
 void render(vec2arr_t *points, int32_t width, int32_t height, float userp[2])
 {
-	char *matrix = calloc(points->size, 1);
-	memset(matrix, '0', points->size);
+	char *matrix = calloc(width*height, 1);
+	memset(matrix, '0', width*height);
+	int j = 0;
+	float sect, inc;
+	sect = inc = (int)(width/points->fidx);
 
-	int max = -1;
-	int min = points->height;
-	for(int i=0; i<points->size; ++i)
+	for(int i = 0; i < width; ++i)
 	{
-		if(i < points->fidx)
+		if(i > sect)
 		{
-			if(max < points->arr[i].y) 
-				max = points->arr[i].y;
-			else if(min > points->arr[i].y) 
-				min = points->arr[i].y;
+			++j;
+			sect += inc;
+			//printf("%d %f\n", j, sect);
 		}
-	}
 
-	int wall_w = points->fidx;
-	const int inc = (points->height-wall_w)/2;
-	int add = 0;
-	for(int i=0; i<points->size; ++i)
-	{
-		if(i < points->fidx)
-		{
-			float d = sqrt((points->arr[i].x-userp[0])*(points->arr[i].x-userp[0]) + 
-							(points->arr[i].y-userp[1])*(points->arr[i].y-userp[1]));
+		float d = sqrt((points->arr[j].x - userp[0]) * (points->arr[j].x - userp[0]) + 
+						(points->arr[j].y - userp[1]) * (points->arr[j].y - userp[1]));
 
-			//printf("%d %d %f\n", points->x[i], points->y[i], d);
-
-			float tmp = 0;
-			while(tmp < (points->height-d*1.5))
-			{
-				//printf("%f\n", tmp);
-				//printf("%f %f\n", (SIZE-points->x[i])-tmp, tmp);
+		//printf("%d %d %f\n", points->x[i], points->y[i], d);
 		
-				if(i > 0 && points->arr[i].y > points->arr[i-1].y && points->arr[i].x > points->arr[i-1].x)
-					add = sqrt(pow((points->arr[i].y - points->arr[i-1].y), 2) + pow((points->arr[i].x - points->arr[i-1].x), 2));
+		float tmp = 0;
+		while(tmp < (height - d * 1.5))
+		{
+			//printf("%f\n", tmp);
+			//printf("%f %f\n", (SIZE-points->x[i])-tmp, tmp);
 
-				matrix[(int)((points->height-d)-tmp)*points->height+inc+add+i] = shadow[(int)d/5%5];
+			matrix[(int)(height - (d + tmp)) * height + i] = '#';
 
-				tmp += 1.0;
-			}
+			tmp += 1.0;
 		}
 
 		//puts("---------");

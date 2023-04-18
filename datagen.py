@@ -13,13 +13,11 @@ if __name__ == "__main__":
 
     size = int(sys.argv[1])
     A = np.full((size, size), '0')
-    x1 = random.randint(0, size)
-    x2 = random.randint(x1+1, size)
-    y1 = random.randint(0, size)
-    y2 = random.randint(y1+1, size)
+    x1 = random.randint(0, size/2)
+    x2 = random.randint(x1, size-1)
+    y1 = random.randint(0, size/2)
+    y2 = random.randint(y1, size-1)
     angle = math.atan2(y2 - y1, x2 - x1) * 180 / math.pi
-
-    print(x1, x2, y1, y2)
 
     x = x1
     y = y1
@@ -32,11 +30,10 @@ if __name__ == "__main__":
 
         print(x, y)
 
-    A[size-1][random.randint(0, size)] = '1'
+    A[size-1][random.randint(0, size-1)] = '1'
  
     with open("map.txt", "w") as f:
-        for char in A.flatten():
-            f.write(char)
+            np.savetxt(f, A.astype(int), fmt='%d', delimiter='')
     A[A=='0'] = ' '
     print(A)       
     print(f"{count} counts of 2's")

@@ -6,7 +6,10 @@ Building a DOOM style image rendering in the command line
 ## How to use
 ```bash
 # Compile
-clang src/main.c -o render -lm 
+cc src/main.c -o render -lm 
+
+# Generate a square map
+python3 datagen.py <size>
 
 # Run
 ./render <width> <height> <view_direnction>
